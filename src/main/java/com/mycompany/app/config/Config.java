@@ -25,7 +25,7 @@ public class Config {
         if (System.getenv("DEVM_ADDRESS") != null) {
             this.mDeviceManagerAddress = System.getenv("DEVM_ADDRESS");
         } else {
-            this.mDeviceManagerAddress = "http://172.20.0.14:5000";
+            this.mDeviceManagerAddress = "http://172.20.0.10:5000";
         }
 
         if (System.getenv("IMGM_ADDRESS") != null) {
@@ -37,19 +37,19 @@ public class Config {
         if (System.getenv("AUTH_ADDRESS") != null) {
             this.mAuthAddress = System.getenv("AUTH_ADDRESS");
         } else {
-            this.mAuthAddress = "http://172.20.0.20:5000";
+            this.mAuthAddress = "http://172.20.0.21:5000";
         }
 
         if (System.getenv("DATA_BROKER_ADDRESS") != null) {
             this.mDataBrokerAddress = System.getenv("DATA_BROKER_ADDRESS");
         } else {
-            this.mDataBrokerAddress = "http://172.20.0.9:80";
+            this.mDataBrokerAddress = "http://172.20.0.5:80";
         }
 
         if (System.getenv("KAFKA_ADDRESS") != null) {
             this.mKafkaAddress = System.getenv("KAFKA_ADDRESS");
         } else {
-            this.mKafkaAddress = "172.20.0.19:9092";
+            this.mKafkaAddress = "172.20.0.27:9092";
         }
 
         this.mInternalDefaultTenant = "dojot-management";
@@ -66,7 +66,7 @@ public class Config {
         this.mKafkaDefaultSessionTimeout = 15000;
 
         Integer randomNumber = (int)(Math.random() * 10000 + 1);
-        this.mKafkaDefaultGroupId = "iotagent-" + randomNumber.toString();
+        this.mKafkaDefaultGroupId = "dojot-module-java-" + randomNumber.toString();
     }
 
     public static synchronized Config getInstance() {

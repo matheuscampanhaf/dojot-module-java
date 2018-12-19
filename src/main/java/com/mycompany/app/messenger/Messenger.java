@@ -3,9 +3,6 @@ package com.mycompany.app.messenger;
 import com.mycompany.app.auth.Auth;
 import com.mycompany.app.config.Config;
 import com.mycompany.app.kafka.TopicManager;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import jdk.nashorn.internal.parser.JSONParser;
-import org.apache.kafka.common.internals.Topic;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -14,11 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.Collections;
 import com.mycompany.app.kafka.Producer;
 import com.mycompany.app.kafka.Consumer;
-import org.json.zip.None;
 
 
 public class Messenger {
@@ -44,11 +39,12 @@ public class Messenger {
 
         Producer mProducer = new Producer(null);
         mConsumer = new Consumer( (ten,msg) -> { this.processKafkaMessages(ten,msg);  return 0;});
-        this.createChannel(Config.getInstance().getTenancyManagerDefaultSubject(),"rw",true);
+
         };
 
 
     public void init(){
+        this.createChannel(Config.getInstance().getTenancyManagerDefaultSubject(),"rw",true);
         this.on(Config.getInstance().getTenancyManagerDefaultSubject(), "message", (ten, msg) -> {this.processNewTenant(ten,msg); return null;});
         ArrayList<String> retTenants = Auth.getInstance().getTenants();
         if(retTenants.isEmpty()){
@@ -127,8 +123,10 @@ public class Messenger {
                 this.mConsumer.subscribe(retTopic);
                 if(this.mTopics.size() == 1) {
                     System.out.println("Starting Consumer thread...");
+                    System.out.flush();
                     try {
-                        this.mConsumer.run();
+                        Thread thread = new Thread(mConsumer);
+                        thread.start();
                         System.out.println("... started consumer thread successfully");
                     } catch (Exception error) {
                         System.out.println("Could not start consumer");
@@ -199,7 +197,10 @@ public class Messenger {
     public static void main (String[] args){
         Messenger msg = new Messenger();
         msg.init();
-//        msg.on("device-data", "admin", (a,b) -> {System.out.println(a + b); return null;});
+        System.out.println("ASUHDASIOD");
+        msg.createChannel("device-data", "r", false);
+        msg.on("device-data", "admin", (a,b) -> {System.out.println(a + b); return null;});
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAASDASDASDADADASD");
 
 
     }
