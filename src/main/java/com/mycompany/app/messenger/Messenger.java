@@ -21,7 +21,7 @@ public class Messenger {
 
 
     Logger mLogger = Logger.getLogger(Messenger.class);
-    private List<String> mTenants;
+    private ArrayList<String> mTenants;
     private Map<String, Map<String, List<BiFunction>>> mEventCallbacks;
     private Map<String, Map<String,String>> mSubjects;
     private Map<String, Map<String,String>> mGlobalSubjects;
@@ -50,6 +50,9 @@ public class Messenger {
         if(retTenants.isEmpty()){
             System.out.println("Cannot initialize messenger, as the list of tenants could not be retrieved. Bailing out");
             return;
+        }
+        for (String ten : retTenants){
+            this.mTenants.add(ten);
         }
         System.out.println("Got list of tenants");
         for(String ten : retTenants) {
@@ -120,7 +123,11 @@ public class Messenger {
 
             if (mode.contains("r")){
                 System.out.println("Telling consumer to subscribe to a new topic...");
-                this.mConsumer.subscribe(retTopic);
+                try {
+                    this.mConsumer.subscribe(retTopic);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
                 if(this.mTopics.size() == 1) {
                     System.out.println("Starting Consumer thread...");
                     System.out.flush();
@@ -152,13 +159,21 @@ public class Messenger {
         System.out.println("Creating channel for: " + subject);
 
         List<String> associatedTenants = new ArrayList<>();
+//        List<String> associatedTenants = new ArrayList<>(this.mTenants);
+        for(String ten : this.mTenants){
+            associatedTenants.add(ten);
+        }
 
         if (isGlobal) {
+            associatedTenants.clear();
             associatedTenants.add(Config.getInstance().getInternalTenant());
             this.mGlobalSubjects.put(subject,new HashMap());
             this.mGlobalSubjects.get(subject).put("mode", mode);
         } else {
-            Collections.copy(associatedTenants,this.mTenants);
+
+            System.out.println(this.mTenants);
+
+            System.out.println(associatedTenants);
             this.mSubjects.put(subject,new HashMap());
             this.mSubjects.get(subject).put("mode", mode);
         }
