@@ -27,6 +27,7 @@ public class Auth {
 
     /**
      * Generate token to be used in internal communication.
+     *
      * @param tenant is the dojot tenant for which the token should be valid for
      * @return JWT token to be used in the requests
      */
@@ -46,6 +47,11 @@ public class Auth {
         return response.toString();
     }
 
+    /**
+     * Gets all tenants that are registered on Auth service.
+     *
+     * @return List of tenants.
+     */
     public ArrayList<String> getTenants(){
         StringBuffer url = new StringBuffer(Config.getInstance().getAuthAddress());
         url.append("/admin/tenants");

@@ -6,11 +6,12 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.log4j.Logger;
 import com.mycompany.app.config.Config;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.Properties;
 
+/**
+ * KafkaProducer wrapper.
+ */
 public class Producer {
     Logger mLogger = Logger.getLogger(Producer.class);
     private static final String DATA_BROKER_DEFAULT = "http://" + Config.getInstance().getDataBrokerAddress();
@@ -18,8 +19,11 @@ public class Producer {
     private String mBrokerManager;
     private KafkaProducer<String, String> mProducer;
 
-    public Producer(String brokerManager) {
-        this.mBrokerManager = brokerManager != null ? brokerManager : DATA_BROKER_DEFAULT;
+    /**
+     * Initializes producer instance.
+     */
+    public Producer() {
+        this.mBrokerManager =  DATA_BROKER_DEFAULT;
 
         // create instance for properties to access producer configs
         Properties props = new Properties();
@@ -33,11 +37,18 @@ public class Producer {
         mProducer = new KafkaProducer<>(props);
     }
 
+    /**
+     * Publishes a message on kafka given a topic.
+     *
+     * @param topic Topic to publish.
+     * @param message Message to publish on the topic.
+     */
     public void produce(String topic, String message) {
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, message);
         this.mProducer.send(producerRecord, new ProducerSendCallback());
 
     }
+
 
     private class ProducerSendCallback implements Callback {
         @Override

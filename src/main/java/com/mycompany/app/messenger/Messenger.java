@@ -13,7 +13,10 @@ import java.util.function.BiFunction;
 import com.mycompany.app.kafka.Producer;
 import com.mycompany.app.kafka.Consumer;
 
-
+/**
+ * Class responsible for sending and receiving messages through Kafka using
+ * dojot subjects and tenants.
+ */
 public class Messenger {
 
     private ArrayList<String> mTenants;
@@ -33,12 +36,15 @@ public class Messenger {
         mTopics = new HashMap<>();
         mProducerTopics = new HashMap<>();
 
-        mProducer = new Producer(null);
+        mProducer = new Producer();
         mConsumer = new Consumer( (ten,msg) -> { this.processKafkaMessages(ten,msg);  return 0;});
 
         };
 
-
+    /**
+     *  Initializes the messenger and sets with all tenants
+     *
+     */
     public void init(){
         this.createChannel(Config.getInstance().getTenancyManagerDefaultSubject(),"rw",true);
         this.on(Config.getInstance().getTenancyManagerDefaultSubject(), "message", (ten, msg) -> {this.processNewTenant(ten,msg); return null;});
@@ -58,9 +64,17 @@ public class Messenger {
         }
     }
 
+    /**
+     * Process new tenant: bootstrap it for all subjects registered and emit
+     * an event.
+     *
+     * @param tenant The tenant associated to the message (NOT NEW TENANT).
+     * @param msg The message just received with the new tenant.
+     */
     private void processNewTenant(String tenant, String msg){
         System.out.println("Received message in tenancy subject");
         System.out.println("Message is: " + msg);
+        System.out.println("Tenant is: " + tenant);
 
 
         JSONObject jsonObj = new JSONObject(msg);
@@ -83,25 +97,37 @@ public class Messenger {
         this.emit(Config.getInstance().getTenancyManagerDefaultSubject(), Config.getInstance().getInternalTenant(), "new-tenant", newTenant);
     }
 
+    /**
+     * Register new callbacks to be invoked when something happens to a subject.
+     *
+     * The callback should have two parameters: tenant, data
+     * @param subject The subject which this subscription is associated to.
+     * @param event The event of this subscription.
+     * @param callback The callback function. Its signature should be
+     * (tenant: str, message:any) : void
+     */
     public void on(String subject, String event, BiFunction<String, String, Void> callback){
         System.out.println("Registering a new callback for subject " + subject + " and event " + event);
 
-        System.out.println("Checking if event callback contains the subject");
         if (!this.mEventCallbacks.containsKey(subject)){
-            System.out.println("eventcallback does not contain the subject " + subject + " adding it...");
             this.mEventCallbacks.put(subject, new HashMap());
         }
-        System.out.println("Checking if eventcallback -> " + subject + " has the key + " + event);
         if(!this.mEventCallbacks.get(subject).containsKey(event)){
-            System.out.println("does not have the key.... adding it");
             this.mEventCallbacks.get(subject).put(event, new ArrayList());
         }
         System.out.println(this.mEventCallbacks.toString());
         this.mEventCallbacks.get(subject).get(event).add(callback);
-
-
     }
 
+    /**
+     * Given a tenant, bootstrap it to all subjects registered.
+     *
+     * @param subject The subject being bootstrapped.
+     * @param tenant The tenant being bootstrapped.
+     * @param mode R/W channel mode (send only, receive only or both).
+     * @param isGlobal flag indicating whether this channel should be
+     * associated to a service or be global.
+     */
     private void bootstrapTenants(String subject, String tenant, String mode, boolean isGlobal){
         System.out.println("Bootstraping tenant: " + tenant + "for subject: " + subject);
         System.out.println("Global: " + isGlobal + "and mode: " + mode);
@@ -159,6 +185,16 @@ public class Messenger {
         }
     }
 
+    /**
+     * Creates a new channel tha is related to tenants, subjects, and kafka
+     * topics.
+     *
+     * @param subject The subject associated to this channel.
+     * @param mode  Channel type ("r" for only receiving messages, "w" for
+     * only sending messages, "rw" for receiving and sending messages).
+     * @param isGlobal flag indicating whether this channel should be
+     * associated to a service or be global.
+     */
     public void createChannel(String subject, String mode, Boolean isGlobal) {
         System.out.println("Creating channel for: " + subject);
 
@@ -189,11 +225,27 @@ public class Messenger {
 
     }
 
+    /**
+     * This method is the callback that consumer will call when receives a message.
+     *
+     * @param topic The topic used to receive the message.
+     * @param message The messages received.
+     */
     private void processKafkaMessages(String topic, String message){
 
         this.emit(this.mTopics.get(topic).get("subject"), this.mTopics.get(topic).get("tenant"), "message", message);
     }
 
+    /**
+     * Executes all callbacks related to that subject:event.
+     *
+     * @param subject The subject to be used when emitting this new event.
+     * @param tenant The tenant to be used when emitting this new event.
+     * @param event  The event to be emitted. This is a arbitrary string.
+     * The module itself will emit only ``message`` events (seldomly
+     * ``new-tenant`` also)
+     * @param data The data to be emitted.
+     */
     private void emit(String subject, String tenant, String event, String data){
         System.out.println("Emitting new event " + event + "for subject " + subject + "@" + tenant);
 
@@ -211,6 +263,13 @@ public class Messenger {
         }
     }
 
+    /**
+     * Publishes a message in kafka.
+     *
+     * @param subject The subject to be used when publish the data.
+     * @param tenant The tenant associated to that message.
+     * @param message The message to be published.
+     */
     public void publish(String subject, String tenant, String message){
         if(!this.mProducerTopics.containsKey(subject)){
             System.out.println("No producer was created for this subject: " + subject);

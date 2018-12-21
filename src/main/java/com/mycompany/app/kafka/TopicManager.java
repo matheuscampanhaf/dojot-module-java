@@ -27,6 +27,14 @@ public class TopicManager {
         return mInstance;
     }
 
+    /**
+     * Get the topic given tenant:subject.
+     *
+     * @param subject Subject of the topic.
+     * @param tenant Tenant of the topic.
+     * @param global If this subject is or not global.
+     * @return The topic related to tenant:subject.
+     */
     public String getTopic(String subject, String tenant, Boolean global){
         StringBuilder key = new StringBuilder(tenant);
         key.append(":" + subject);

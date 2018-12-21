@@ -2,7 +2,6 @@ package com.mycompany.app.kafka;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,18 +10,22 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import com.mycompany.app.config.Config;
-import org.apache.log4j.Logger;
-import org.json.zip.None;
 
-
+/**
+ * KafkaConsumer wrapper
+ */
 public class Consumer implements Runnable {
-    Logger mLogger = Logger.getLogger(Consumer.class);
 
     private KafkaConsumer<String, String> mConsumer;
     private List<String> mTopics;
     boolean shouldStop;
     BiFunction<String, String, Integer> mCallback;
 
+    /**
+     * Create a consumer instance
+     *
+     * @param callback Function to be called when receive a kafka message.
+     */
     public Consumer(BiFunction<String, String, Integer> callback) {
 
         this.mTopics = new ArrayList<>();
@@ -37,23 +40,27 @@ public class Consumer implements Runnable {
     }
 
 
-
+    /**
+     * Adds topic to subscribe.
+     *
+     * @param topic topic to subscribe.
+     */
     public void subscribe(String topic){
         mTopics.add(topic);
     }
 
+    /**
+     * Initiate the consumer thread.
+     */
     @Override
     public void run() {
         this.shouldStop = false;
         try {
-            mLogger.info("Consumer thread is started and running...");
             System.out.println("Subscribing to topics: " + this.mTopics);
             this.mConsumer.subscribe(this.mTopics, new ConsumerRebalanceListener() {
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                    mLogger.info("topic-partitions are revoked from this consumer: " + Arrays.toString(partitions.toArray()));
                 }
                 public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                    mLogger.info("topic-partitions are assigned to this consumer: " + Arrays.toString(partitions.toArray()));
                 }
             });
 
@@ -64,7 +71,6 @@ public class Consumer implements Runnable {
                     this.mCallback.apply(record.topic(), record.value());
                 }
             }
-            System.out.println("AKKKKKKKKKKKKKKAKAKA");
             this.run();
         } catch (WakeupException e) {
             // ignore for shutdown
