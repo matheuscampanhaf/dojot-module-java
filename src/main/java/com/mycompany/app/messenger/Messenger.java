@@ -3,7 +3,6 @@ package com.mycompany.app.messenger;
 import com.mycompany.app.auth.Auth;
 import com.mycompany.app.config.Config;
 import com.mycompany.app.kafka.TopicManager;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -11,16 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.Collections;
 import com.mycompany.app.kafka.Producer;
 import com.mycompany.app.kafka.Consumer;
 
 
 public class Messenger {
 
-
-
-    Logger mLogger = Logger.getLogger(Messenger.class);
     private ArrayList<String> mTenants;
     private Map<String, Map<String, List<BiFunction>>> mEventCallbacks;
     private Map<String, Map<String,String>> mSubjects;
@@ -28,6 +23,7 @@ public class Messenger {
     private Map<String, Map<String,String>> mTopics;
     private Map<String, Map<String,String>> mProducerTopics;
     private Consumer mConsumer;
+    private Producer mProducer;
 
     public Messenger(){
         mTenants = new ArrayList<>();
@@ -37,7 +33,7 @@ public class Messenger {
         mTopics = new HashMap<>();
         mProducerTopics = new HashMap<>();
 
-        Producer mProducer = new Producer(null);
+        mProducer = new Producer(null);
         mConsumer = new Consumer( (ten,msg) -> { this.processKafkaMessages(ten,msg);  return 0;});
 
         };
@@ -68,8 +64,8 @@ public class Messenger {
 
 
         JSONObject jsonObj = new JSONObject(msg);
-
-        if(jsonObj.isNull(tenant)){
+        System.out.println(jsonObj.toString());
+        if(jsonObj.isNull("tenant")){
             System.out.println("Received message is invalid");
             return;
         }
@@ -90,14 +86,20 @@ public class Messenger {
     public void on(String subject, String event, BiFunction<String, String, Void> callback){
         System.out.println("Registering a new callback for subject " + subject + " and event " + event);
 
+        System.out.println("Checking if event callback contains the subject");
         if (!this.mEventCallbacks.containsKey(subject)){
+            System.out.println("eventcallback does not contain the subject " + subject + " adding it...");
             this.mEventCallbacks.put(subject, new HashMap());
         }
+        System.out.println("Checking if eventcallback -> " + subject + " has the key + " + event);
         if(!this.mEventCallbacks.get(subject).containsKey(event)){
+            System.out.println("does not have the key.... adding it");
             this.mEventCallbacks.get(subject).put(event, new ArrayList());
         }
-
+        System.out.println(this.mEventCallbacks.toString());
         this.mEventCallbacks.get(subject).get(event).add(callback);
+
+
     }
 
     private void bootstrapTenants(String subject, String tenant, String mode, boolean isGlobal){
@@ -125,6 +127,7 @@ public class Messenger {
                 System.out.println("Telling consumer to subscribe to a new topic...");
                 try {
                     this.mConsumer.subscribe(retTopic);
+                    this.mConsumer.setShouldStop(true);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -144,11 +147,12 @@ public class Messenger {
             }
 
             if (mode.contains("w")) {
-                System.out.println("Adding a producer topic..");
+                System.out.println("Adding a producer topic: " + subject + " " + tenant + " " + retTopic);
                 if (!this.mProducerTopics.containsKey(subject)) {
+                    System.out.println("entered here registering new producer");
                     this.mProducerTopics.put(subject, new HashMap());
-                    this.mProducerTopics.get(subject).put(tenant, retTopic);
                 }
+                this.mProducerTopics.get(subject).put(tenant, retTopic);
             }
         } catch(Exception error) {
             System.out.println("Something went wrong while bootstraping the tenant: " + error);
@@ -186,7 +190,6 @@ public class Messenger {
     }
 
     private void processKafkaMessages(String topic, String message){
-        System.out.println("topic is: " + topic + " message is : " + message);
 
         this.emit(this.mTopics.get(topic).get("subject"), this.mTopics.get(topic).get("tenant"), "message", message);
     }
@@ -208,16 +211,17 @@ public class Messenger {
         }
     }
 
+    public void publish(String subject, String tenant, String message){
+        if(!this.mProducerTopics.containsKey(subject)){
+            System.out.println("No producer was created for this subject: " + subject);
+            return;
+        }
+        if(!this.mProducerTopics.get(subject).containsKey(tenant)){
+            System.out.println("No producer was created for this subject: " + subject + "and tenant: " + tenant);
+            return;
+        }
 
-    public static void main (String[] args){
-        Messenger msg = new Messenger();
-        msg.init();
-        System.out.println("ASUHDASIOD");
-        msg.createChannel("device-data", "r", false);
-        msg.on("device-data", "admin", (a,b) -> {System.out.println(a + b); return null;});
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAASDASDASDADADASD");
-
-
+        this.mProducer.produce(this.mProducerTopics.get(subject).get(tenant), message);
     }
 
 }

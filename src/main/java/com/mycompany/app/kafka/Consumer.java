@@ -20,11 +20,13 @@ public class Consumer implements Runnable {
 
     private KafkaConsumer<String, String> mConsumer;
     private List<String> mTopics;
+    boolean shouldStop;
+    BiFunction<String, String, Integer> mCallback;
 
     public Consumer(BiFunction<String, String, Integer> callback) {
 
         this.mTopics = new ArrayList<>();
-
+        this.mCallback = callback;
         Properties props = new Properties();
         props.put("bootstrap.servers", Config.getInstance().getKafkaAddress());
         props.put("group.id", Config.getInstance().getKafkaDefaultGroupId());
@@ -38,21 +40,14 @@ public class Consumer implements Runnable {
 
     public void subscribe(String topic){
         mTopics.add(topic);
-        this.mConsumer.subscribe(this.mTopics, new ConsumerRebalanceListener() {
-            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                mLogger.info("topic-partitions are revoked from this consumer: " + Arrays.toString(partitions.toArray()));
-            }
-            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                mLogger.info("topic-partitions are assigned to this consumer: " + Arrays.toString(partitions.toArray()));
-            }
-        });
     }
 
     @Override
     public void run() {
+        this.shouldStop = false;
         try {
             mLogger.info("Consumer thread is started and running...");
-
+            System.out.println("Subscribing to topics: " + this.mTopics);
             this.mConsumer.subscribe(this.mTopics, new ConsumerRebalanceListener() {
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
                     mLogger.info("topic-partitions are revoked from this consumer: " + Arrays.toString(partitions.toArray()));
@@ -62,12 +57,15 @@ public class Consumer implements Runnable {
                 }
             });
 
-            while (true) {
+            while (!this.shouldStop) {
+//                System.out.println("shouldStop: " + this.shouldStop);
                 ConsumerRecords<String, String> records = mConsumer.poll(10000);
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.println(record.toString());
+                    this.mCallback.apply(record.topic(), record.value());
                 }
             }
+            System.out.println("AKKKKKKKKKKKKKKAKAKA");
+            this.run();
         } catch (WakeupException e) {
             // ignore for shutdown
         } finally {
@@ -77,5 +75,9 @@ public class Consumer implements Runnable {
 
     public void shutdown() {
         mConsumer.wakeup();
+    }
+
+    public synchronized void setShouldStop(boolean set){
+        this.shouldStop = set;
     }
 }

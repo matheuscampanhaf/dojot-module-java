@@ -37,22 +37,22 @@ public class Config {
         if (System.getenv("AUTH_ADDRESS") != null) {
             this.mAuthAddress = System.getenv("AUTH_ADDRESS");
         } else {
-            this.mAuthAddress = "http://172.20.0.21:5000";
+            this.mAuthAddress = "http://172.20.0.4:5000";
         }
 
         if (System.getenv("DATA_BROKER_ADDRESS") != null) {
             this.mDataBrokerAddress = System.getenv("DATA_BROKER_ADDRESS");
         } else {
-            this.mDataBrokerAddress = "http://172.20.0.5:80";
+            this.mDataBrokerAddress = "http://172.20.0.23:80";
         }
 
         if (System.getenv("KAFKA_ADDRESS") != null) {
             this.mKafkaAddress = System.getenv("KAFKA_ADDRESS");
         } else {
-            this.mKafkaAddress = "172.20.0.27:9092";
+            this.mKafkaAddress = "172.20.0.11:9092";
         }
 
-        this.mInternalDefaultTenant = "dojot-management";
+        this.mInternalDefaultTenant = "internal";
 
         this.mDeviceManagerDefaultSubject = "dojot.device-manager.device";
         this.mDeviceManagerDefaultManager = "http://" + this.mDeviceManagerAddress;

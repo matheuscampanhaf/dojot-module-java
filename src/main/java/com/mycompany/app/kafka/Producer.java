@@ -33,14 +33,10 @@ public class Producer {
         mProducer = new KafkaProducer<>(props);
     }
 
-    public void sendEvent(String tenant, String subject, JSONObject eventData) {
-        String topic = TopicManager.getInstance().getTopic(subject, tenant, false);
-        if (topic.length() > 0) {
-            JSONArray eventDataArray = new JSONArray().put(eventData.toString());
-            mLogger.debug("Topic [" + topic + "] - Sending message:" + eventData.toString());
-            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, eventData.toString());
-            this.mProducer.send(producerRecord, new ProducerSendCallback());
-        }
+    public void produce(String topic, String message) {
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, message);
+        this.mProducer.send(producerRecord, new ProducerSendCallback());
+
     }
 
     private class ProducerSendCallback implements Callback {
