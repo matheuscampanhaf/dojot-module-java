@@ -67,7 +67,7 @@ public class Auth {
         } catch (JSONException exception){
                 return resTenants;
         }
-
+        System.out.println("resTenants:::: " + resTenants);
         return resTenants;
     }
 }
