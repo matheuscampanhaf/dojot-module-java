@@ -246,7 +246,7 @@ public class Messenger {
      * ``new-tenant`` also)
      * @param data The data to be emitted.
      */
-    private void emit(String subject, String tenant, String event, String data){
+    public void emit(String subject, String tenant, String event, String data){
         System.out.println("Emitting new event " + event + "for subject " + subject + "@" + tenant);
 
         if(!this.mEventCallbacks.containsKey(subject)){

@@ -25,6 +25,7 @@ public class Config {
         if (System.getenv("DEVM_ADDRESS") != null) {
             this.mDeviceManagerAddress = System.getenv("DEVM_ADDRESS");
         } else {
+            // this.mDeviceManagerAddress = "http://172.20.0.21:5000";
             this.mDeviceManagerAddress = "http://device-manager:5000";
         }
 
@@ -37,18 +38,21 @@ public class Config {
         if (System.getenv("AUTH_ADDRESS") != null) {
             this.mAuthAddress = System.getenv("AUTH_ADDRESS");
         } else {
+            // this.mAuthAddress = "http://172.20.0.22:5000";
             this.mAuthAddress = "http://auth:5000";
         }
 
         if (System.getenv("DATA_BROKER_ADDRESS") != null) {
             this.mDataBrokerAddress = System.getenv("DATA_BROKER_ADDRESS");
         } else {
+            // this.mDataBrokerAddress = "http://172.20.0.18:80";
             this.mDataBrokerAddress = "http://data-broker:80";
         }
 
         if (System.getenv("KAFKA_ADDRESS") != null) {
             this.mKafkaAddress = System.getenv("KAFKA_ADDRESS");
         } else {
+            // this.mKafkaAddress = "172.20.0.16:9092";
             this.mKafkaAddress = "kafka:9092";
         }
 
