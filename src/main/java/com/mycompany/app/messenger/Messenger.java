@@ -3,6 +3,7 @@ package com.mycompany.app.messenger;
 import com.mycompany.app.auth.Auth;
 import com.mycompany.app.config.Config;
 import com.mycompany.app.kafka.TopicManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -12,6 +13,11 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import com.mycompany.app.kafka.Producer;
 import com.mycompany.app.kafka.Consumer;
+
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 /**
  * Class responsible for sending and receiving messages through Kafka using
@@ -281,6 +287,69 @@ public class Messenger {
         }
 
         this.mProducer.produce(this.mProducerTopics.get(subject).get(tenant), message);
+    }
+
+    /**
+     * Generate device.create event for active devices on dojot.
+     */
+    public void generateDeviceCreateEventForActiveDevices(){
+        List<String> tenants = Auth.getInstance().getTenants();
+        if(tenants.isEmpty()){
+            System.out.println("Could not get list of tenants");
+            return;
+        }
+
+        for (String tenant: tenants){
+            this.requestDevice(tenant);
+        }
+    }
+
+    /**
+     * Iterate over devices pagination
+     *
+     * @param tenant
+     */
+    public void requestDevice(String tenant){
+        Boolean hasNext = true;
+        Integer pageNum = 0;
+        String extraArg;
+        String url;
+
+        while(hasNext){
+            extraArg = "";
+            if(pageNum > 0){
+                extraArg = "?page_num=" + pageNum.toString();
+            }
+            url = "http://172.20.0.6:5000/device" + extraArg;
+            hasNext = false;
+            try {
+                HttpResponse<JsonNode> response = Unirest.get(url)
+                        .header("authorization", "Bearer " + Auth.getInstance().getToken(tenant))
+                        .asJson();
+                System.out.println(response.getBody().toString());
+                JSONObject responseObj = response.getBody().getObject();
+
+                if(responseObj.getJSONObject("pagination").get("has_next").toString().equals("true")){
+                    hasNext = true;
+                    pageNum = (Integer) responseObj.getJSONObject("pagination").get("next_page");
+                }
+
+                JSONArray devices = responseObj.getJSONArray("devices");
+
+                for (int i = 0;i < devices.length();i++){
+                    JSONObject device = devices.getJSONObject(i);
+                    JSONObject dataEvent = new JSONObject();
+                    dataEvent.put("event", "create");
+                    dataEvent.put("data", dataEvent);
+
+//                    this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
+                }
+
+            } catch (UnirestException exception) {
+                System.out.println("Cannot get url" + url);
+                System.out.println("Exception: " + exception.toString());
+            }
+        }
     }
 
 }
