@@ -1,4 +1,4 @@
-package com.mycompany.app.config;
+package com.cpqd.app.config;
 
 import java.lang.System;
 

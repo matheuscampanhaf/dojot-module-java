@@ -1,8 +1,9 @@
-package com.mycompany.app.messenger;
+package com.cpqd.app.messenger;
 
-import com.mycompany.app.auth.Auth;
-import com.mycompany.app.config.Config;
-import com.mycompany.app.kafka.TopicManager;
+import com.cpqd.app.auth.Auth;
+import com.cpqd.app.config.Config;
+import com.cpqd.app.kafka.TopicManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -10,8 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import com.mycompany.app.kafka.Producer;
-import com.mycompany.app.kafka.Consumer;
+import com.cpqd.app.kafka.Producer;
+import com.cpqd.app.kafka.Consumer;
+
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 /**
  * Class responsible for sending and receiving messages through Kafka using
@@ -281,6 +287,72 @@ public class Messenger {
         }
 
         this.mProducer.produce(this.mProducerTopics.get(subject).get(tenant), message);
+    }
+
+    /**
+     * Generate device.create event for active devices on dojot.
+     */
+    public void generateDeviceCreateEventForActiveDevices(){
+        System.out.println("Requested to generate device create events");
+        if(this.mTenants.isEmpty()){
+            System.out.println("There isn't a tenant created yet.");
+            return;
+        }
+
+        for (String tenant: this.mTenants){
+            this.requestDevice(tenant);
+        }
+    }
+
+    /**
+     * Iterate over devices pagination
+     *
+     * @param tenant
+     */
+    public void requestDevice(String tenant){
+        Boolean hasNext = true;
+        Integer pageNum = 0;
+        String extraArg;
+        String url;
+
+        while(hasNext){
+            extraArg = "";
+            if(pageNum > 0){
+                extraArg = "?page_num=" + pageNum.toString();
+            }
+            url = Config.getInstance().getDeviceManagerAddress() + "/device" + extraArg;
+            System.out.println("URL:::: " + url);
+            hasNext = false;
+            try {
+                HttpResponse<JsonNode> response = Unirest.get(url)
+                        .header("authorization", "Bearer " + Auth.getInstance().getToken(tenant))
+                        .asJson();
+
+                JSONObject responseObj = response.getBody().getObject();
+
+                if(responseObj.getJSONObject("pagination").get("has_next").toString().equals("true")){
+                    hasNext = true;
+                    pageNum = (Integer) responseObj.getJSONObject("pagination").get("next_page");
+                }
+
+                JSONArray devices = responseObj.getJSONArray("devices");
+
+                for (int i = 0;i < devices.length();i++){
+                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAa");
+                    JSONObject device = devices.getJSONObject(i);
+                    JSONObject dataEvent = new JSONObject();
+                    dataEvent.put("event", "create");
+                    dataEvent.put("data", device);
+                    System.out.println("will generate event, this is the event sent to kafka: " + dataEvent.toString());
+                    System.out.println(" ");
+                    this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
+                }
+
+            } catch (UnirestException exception) {
+                System.out.println("Cannot get url:::::: " + url);
+                System.out.println("Exception: " + exception.toString());
+            }
+        }
     }
 
 }
