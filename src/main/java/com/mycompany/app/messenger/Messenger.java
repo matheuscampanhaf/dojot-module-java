@@ -319,7 +319,7 @@ public class Messenger {
             if(pageNum > 0){
                 extraArg = "?page_num=" + pageNum.toString();
             }
-            url = "http://172.20.0.6:5000/device" + extraArg;
+            url = Config.getInstance().getDeviceManagerAddress() + "/device" + extraArg;
             hasNext = false;
             try {
                 HttpResponse<JsonNode> response = Unirest.get(url)
