@@ -293,6 +293,7 @@ public class Messenger {
      * Generate device.create event for active devices on dojot.
      */
     public void generateDeviceCreateEventForActiveDevices(){
+        System.out.println("Requested to generate device create events");
         if(this.mTenants.isEmpty()){
             System.out.println("There isn't a tenant created yet.");
             return;
@@ -337,6 +338,7 @@ public class Messenger {
                 JSONArray devices = responseObj.getJSONArray("devices");
 
                 for (int i = 0;i < devices.length();i++){
+                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAa");
                     JSONObject device = devices.getJSONObject(i);
                     JSONObject dataEvent = new JSONObject();
                     dataEvent.put("event", "create");
