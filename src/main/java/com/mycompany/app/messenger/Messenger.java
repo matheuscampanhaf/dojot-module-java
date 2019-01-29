@@ -346,7 +346,7 @@ public class Messenger {
                 }
 
             } catch (UnirestException exception) {
-                System.out.println("Cannot get url" + url);
+                System.out.println("Cannot get url:::::: " + url);
                 System.out.println("Exception: " + exception.toString());
             }
         }
