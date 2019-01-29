@@ -326,7 +326,7 @@ public class Messenger {
                 HttpResponse<JsonNode> response = Unirest.get(url)
                         .header("authorization", "Bearer " + Auth.getInstance().getToken(tenant))
                         .asJson();
-                System.out.println(response.getBody().toString());
+
                 JSONObject responseObj = response.getBody().getObject();
 
                 if(responseObj.getJSONObject("pagination").get("has_next").toString().equals("true")){
@@ -340,8 +340,9 @@ public class Messenger {
                     JSONObject device = devices.getJSONObject(i);
                     JSONObject dataEvent = new JSONObject();
                     dataEvent.put("event", "create");
-                    dataEvent.put("data", dataEvent);
-
+                    dataEvent.put("data", device);
+                    System.out.println("will generate event, this is the event sent to kafka: " + dataEvent.toString());
+                    System.out.println(" ");
                     this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
                 }
 
