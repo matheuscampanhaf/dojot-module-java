@@ -293,13 +293,12 @@ public class Messenger {
      * Generate device.create event for active devices on dojot.
      */
     public void generateDeviceCreateEventForActiveDevices(){
-        List<String> tenants = Auth.getInstance().getTenants();
-        if(tenants.isEmpty()){
-            System.out.println("Could not get list of tenants");
+        if(this.mTenants.isEmpty()){
+            System.out.println("There isn't a tenant created yet.");
             return;
         }
 
-        for (String tenant: tenants){
+        for (String tenant: this.mTenants){
             this.requestDevice(tenant);
         }
     }
@@ -342,7 +341,7 @@ public class Messenger {
                     dataEvent.put("event", "create");
                     dataEvent.put("data", dataEvent);
 
-//                    this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
+                    this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
                 }
 
             } catch (UnirestException exception) {
