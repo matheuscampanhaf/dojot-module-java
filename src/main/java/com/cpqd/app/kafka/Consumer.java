@@ -9,7 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
-import com.mycompany.app.config.Config;
+import com.cpqd.app.config.Config;
 
 /**
  * KafkaConsumer wrapper
