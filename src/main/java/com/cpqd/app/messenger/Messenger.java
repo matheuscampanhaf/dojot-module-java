@@ -253,7 +253,7 @@ public class Messenger {
      * @param data The data to be emitted.
      */
     public void emit(String subject, String tenant, String event, String data){
-        System.out.println("Emitting new event " + event + "for subject " + subject + "@" + tenant);
+        System.out.println("Emitting new event " + event + " for subject " + subject + "@" + tenant);
 
         if(!this.mEventCallbacks.containsKey(subject)){
             System.out.println("No one is listening to " + subject + " events");
@@ -338,18 +338,15 @@ public class Messenger {
                 JSONArray devices = responseObj.getJSONArray("devices");
 
                 for (int i = 0;i < devices.length();i++){
-                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAa");
                     JSONObject device = devices.getJSONObject(i);
                     JSONObject dataEvent = new JSONObject();
                     dataEvent.put("event", "create");
                     dataEvent.put("data", device);
-                    System.out.println("will generate event, this is the event sent to kafka: " + dataEvent.toString());
-                    System.out.println(" ");
                     this.emit(Config.getInstance().getDeviceManagerDefaultSubject(),tenant,"message", dataEvent.toString());
                 }
 
             } catch (UnirestException exception) {
-                System.out.println("Cannot get url:::::: " + url);
+                System.out.println("Cannot get url: " + url);
                 System.out.println("Exception: " + exception.toString());
             }
         }
