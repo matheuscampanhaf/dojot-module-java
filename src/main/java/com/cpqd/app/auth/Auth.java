@@ -1,10 +1,10 @@
-package com.mycompany.app.auth;
+package com.cpqd.app.auth;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mycompany.app.config.Config;
+import com.cpqd.app.config.Config;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;

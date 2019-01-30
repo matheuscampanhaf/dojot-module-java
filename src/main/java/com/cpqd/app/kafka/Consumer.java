@@ -1,4 +1,4 @@
-package com.mycompany.app.kafka;
+package com.cpqd.app.kafka;
 
 import java.util.*;
 import java.util.function.BiFunction;

@@ -1,8 +1,8 @@
-package com.mycompany.app.messenger;
+package com.cpqd.app.messenger;
 
-import com.mycompany.app.auth.Auth;
-import com.mycompany.app.config.Config;
-import com.mycompany.app.kafka.TopicManager;
+import com.cpqd.app.auth.Auth;
+import com.cpqd.app.config.Config;
+import com.cpqd.app.kafka.TopicManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import com.mycompany.app.kafka.Producer;
-import com.mycompany.app.kafka.Consumer;
+import com.cpqd.app.kafka.Producer;
+import com.cpqd.app.kafka.Consumer;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;

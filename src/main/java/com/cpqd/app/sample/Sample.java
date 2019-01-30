@@ -1,7 +1,7 @@
-package com.mycompany.app.sample;
+package com.cpqd.app.sample;
 
-import com.mycompany.app.config.Config;
-import com.mycompany.app.messenger.Messenger;
+import com.cpqd.app.config.Config;
+import com.cpqd.app.messenger.Messenger;
 
 import java.util.concurrent.TimeUnit;
 

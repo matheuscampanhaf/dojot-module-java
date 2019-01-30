@@ -1,11 +1,11 @@
-package com.mycompany.app.kafka;
+package com.cpqd.app.kafka;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mycompany.app.auth.Auth;
-import com.mycompany.app.config.Config;
+import com.cpqd.app.auth.Auth;
+import com.cpqd.app.config.Config;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
