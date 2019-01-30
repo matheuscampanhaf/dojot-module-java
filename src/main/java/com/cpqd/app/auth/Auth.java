@@ -8,7 +8,6 @@ import com.cpqd.app.config.Config;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
