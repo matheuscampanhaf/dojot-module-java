@@ -56,24 +56,27 @@ public class Consumer implements Runnable {
     public void run() {
         this.shouldStop = false;
         try {
-            System.out.println("Subscribing to topics: " + this.mTopics);
-            this.mConsumer.subscribe(this.mTopics, new ConsumerRebalanceListener() {
-                public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                }
-                public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                }
-            });
+            while (true) {
+                System.out.println("Subscribing to topics: " + this.mTopics);
+                this.mConsumer.subscribe(this.mTopics, new ConsumerRebalanceListener() {
+                    public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                    }
+                    public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                    }
+                });
 
-            while (!this.shouldStop) {
-//                System.out.println("shouldStop: " + this.shouldStop);
-                ConsumerRecords<String, String> records = mConsumer.poll(10000);
-                for (ConsumerRecord<String, String> record : records) {
-                    this.mCallback.apply(record.topic(), record.value());
+                while (!this.shouldStop) {
+    //                System.out.println("shouldStop: " + this.shouldStop);
+                    ConsumerRecords<String, String> records = mConsumer.poll(10000);
+                    for (ConsumerRecord<String, String> record : records) {
+                        this.mCallback.apply(record.topic(), record.value());
+                    }
                 }
             }
-            this.run();
         } catch (WakeupException e) {
             // ignore for shutdown
+            // This thread will only stop if this exception is thrown (which
+            // is done by calling 'shutdown')
         } finally {
             mConsumer.close();
         }
