@@ -57,7 +57,7 @@ public class Messenger {
         ArrayList<String> retTenants = Auth.getInstance().getTenants();
         if(retTenants.isEmpty()){
             System.out.println("Cannot initialize messenger, as the list of tenants could not be retrieved. Bailing out");
-            return;
+            throw new Error("Could not retrieve tenants");
         }
         for (String ten : retTenants){
             this.mTenants.add(ten);
